@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Axios Grade Tracker Pro",
+  "version": "1.0.0",
+  "description": "Estrai, analizza e visualizza i tuoi voti dal registro elettronico Axios con statistiche avanzate. Attiva con Alt+M.",
+  "author": "Axios Grade Tracker Pro",
+
+  "permissions": [
+    "activeTab"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.axioscloud.it/*"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["styles.css"],
+      "matches": ["https://*.axioscloud.it/*"]
+    }
+  ]
+}

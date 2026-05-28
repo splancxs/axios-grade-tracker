@@ -127,21 +127,92 @@
     constructor() {
       this._overlayEl  = null;
       this._tooltipEl  = null;
+      this._triggerBtnEl = null;
+      this._monitoringTimer = null;
       this._boundKeyHandler = this._onKeyDown.bind(this);
       this._init();
     }
 
-    // ── Inizializzazione listener tastiera ───────────────────────────────────
+    // ── Inizializzazione listener tastiera e monitoraggio ────────────────────
     _init() {
       document.addEventListener('keydown', this._boundKeyHandler);
-      console.info('[AxiosGradeTracker] Pronto. Premi Alt+M per aprire la dashboard.');
+      console.info('[AxiosGradeTracker] Pronto. Premi Alt+M o usa il pulsante in pagina per aprire la dashboard.');
+      this._startTableMonitoring();
     }
 
-    // ── Handler tasti ─────────────────────────────────────────────────────────
-    _onKeyDown(e) {
-      if (e.altKey && (e.key === 'm' || e.key === 'M')) {
-        e.preventDefault();
+    // ── Monitoraggio della presenza della tabella voti ───────────────────────
+    _startTableMonitoring() {
+      // Controlla ogni 1.5 secondi se la tabella dei voti è presente nel DOM
+      this._monitoringTimer = setInterval(() => {
+        const table = this._findGradeTable();
+        if (table) {
+          this._injectTriggerButton();
+        } else {
+          this._removeTriggerButton();
+        }
+      }, 1500);
+    }
+
+    // ── Cerca la barra del footer di Axios nel DOM ───────────────────────────
+    _findFooterElement() {
+      // Cerca in tutti i tag comuni per contenitori di testo di footer
+      const tags = ['footer', 'div', 'p', 'span'];
+      for (const tag of tags) {
+        const elements = document.querySelectorAll(tag);
+        for (const el of elements) {
+          const text = el.textContent || '';
+          if (text.includes('Axios Italia') && (text.includes('Registro Elettronico') || text.includes('©'))) {
+            // Assicuriamoci che non sia un elemento contenitore troppo ampio (es. body, html o tabelle intere)
+            if (el.children.length <= 15 && el.tagName !== 'BODY' && el.tagName !== 'HTML') {
+              return el;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    // ── Iniezione del pulsante "Apri Dashboard" ──────────────────────────────
+    _injectTriggerButton() {
+      if (document.getElementById('ax-pro-trigger-btn')) return; // già presente
+
+      const btn = document.createElement('button');
+      btn.id = 'ax-pro-trigger-btn';
+      btn.className = 'ax-pro-trigger-btn';
+      btn.innerHTML = '<span>📊</span> Apri Dashboard';
+      btn.title = 'Visualizza statistiche avanzate e medie (Alt+M)';
+      btn.setAttribute('aria-label', 'Apri dashboard statistiche voti');
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         this._launch();
+      });
+
+      const footer = this._findFooterElement();
+      if (footer) {
+        // Imposta position relative per permettere il posizionamento assoluto del pulsante
+        const computedStyle = window.getComputedStyle(footer);
+        if (computedStyle.position === 'static') {
+          footer.style.position = 'relative';
+        }
+        btn.classList.add('ax-pro-trigger-btn--footer');
+        footer.appendChild(btn);
+        console.info('[AxiosGradeTracker] Pulsante inserito nella barra del footer.');
+      } else {
+        btn.classList.add('ax-pro-trigger-btn--fixed');
+        document.body.appendChild(btn);
+        console.info('[AxiosGradeTracker] Barra del footer non trovata, pulsante inserito come elemento fluttuante.');
+      }
+
+      this._triggerBtnEl = btn;
+    }
+
+    // ── Rimozione del pulsante ────────────────────────────────────────────────
+    _removeTriggerButton() {
+      const btn = document.getElementById('ax-pro-trigger-btn');
+      if (btn) {
+        btn.parentNode.removeChild(btn);
+        this._triggerBtnEl = null;
       }
     }
 
@@ -244,7 +315,7 @@
       }
     }
 
-    // ── Identifica la tabella corretta dei voti ───────────────────────────────
+    // ── Identifica la tabella corretta dei voti (solo nella sezione Voti Elenco) ──
     _findGradeTable() {
       const tables = document.querySelectorAll('table');
 
@@ -254,24 +325,18 @@
           el => el.textContent.trim().toLowerCase()
         );
 
-        const hasMateriaHeader    = headers.some(h => h.includes('materia') || h.includes('disciplina'));
+        const hasMateriaHeader = headers.some(h => h.includes('materia') || h.includes('disciplina'));
         const hasValutazioneHeader = headers.some(h =>
-          h.includes('valutazione') || h.includes('voto') || h.includes('voti') || h.includes('descrizione')
+          h.includes('valutazione') || h.includes('voto') || h.includes('voti')
+        );
+        const hasDataHeader = headers.some(h => h.includes('data'));
+        const hasDocenteHeader = headers.some(h =>
+          h.includes('docente') || h.includes('professore') || h.includes('insegnante') || h.includes('prof')
         );
 
-        if (hasMateriaHeader && hasValutazioneHeader) {
+        // La tabella dei voti in elenco contiene tutti questi elementi distintivi
+        if (hasMateriaHeader && hasValutazioneHeader && hasDataHeader && hasDocenteHeader) {
           console.info('[AxiosGradeTracker] Tabella voti identificata:', table);
-          return table;
-        }
-      }
-
-      // Fallback meno restrittivo: tabella con almeno "materia" nelle intestazioni
-      for (const table of tables) {
-        const headers = Array.from(table.querySelectorAll('th, thead td')).map(
-          el => el.textContent.trim().toLowerCase()
-        );
-        if (headers.some(h => h.includes('materia') || h.includes('disciplina'))) {
-          console.warn('[AxiosGradeTracker] Usato fallback: trovata tabella solo con intestazione "Materia".');
           return table;
         }
       }

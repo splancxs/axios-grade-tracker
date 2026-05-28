@@ -515,3 +515,113 @@
   .ax-pro-grid        { grid-template-columns: 1fr; }
   .ax-pro-summary     { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---------- Trigger Button ---------- */
+#ax-pro-trigger-btn {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+/* Variante: Pulsante Fluttuante (Fallback) */
+#ax-pro-trigger-btn.ax-pro-trigger-btn--fixed {
+  position: fixed;
+  bottom: 75px;
+  right: 24px;
+  z-index: 2147483645;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 60%, #10b981 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 30px;
+  padding: 12px 22px;
+  color: #ffffff;
+  font-size: 0.92rem;
+  box-shadow:
+    0 8px 30px rgba(99, 102, 241, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: ax-pro-trigger-bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+#ax-pro-trigger-btn.ax-pro-trigger-btn--fixed:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow:
+    0 12px 35px rgba(99, 102, 241, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+#ax-pro-trigger-btn.ax-pro-trigger-btn--fixed:active {
+  transform: translateY(-1px) scale(0.97);
+  box-shadow:
+    0 4px 15px rgba(99, 102, 241, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+#ax-pro-trigger-btn.ax-pro-trigger-btn--fixed span {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* Variante: Integrato nel footer */
+#ax-pro-trigger-btn.ax-pro-trigger-btn--footer {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 99;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  gap: 6px;
+  height: 24px;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  animation: ax-pro-trigger-bounce-in-footer 0.3s ease-out forwards;
+}
+
+#ax-pro-trigger-btn.ax-pro-trigger-btn--footer:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.02);
+}
+
+#ax-pro-trigger-btn.ax-pro-trigger-btn--footer:active {
+  transform: translateY(-50%) scale(0.97);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+#ax-pro-trigger-btn.ax-pro-trigger-btn--footer span {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+@keyframes ax-pro-trigger-bounce-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ax-pro-trigger-bounce-in-footer {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
